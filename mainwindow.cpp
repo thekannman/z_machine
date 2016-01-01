@@ -11,6 +11,8 @@
 #include <QBrush>
 #include "histdialog.h"
 #include "scatterdialog.h"
+#include "tree.h"
+#include "log_reg.h"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -32,11 +34,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 void MainWindow::createMenus() {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAction);
+
     plotMenu = menuBar()->addMenu(tr("&Plot"));
     plotMenu->addAction(plotHistAction);
     plotMenu->addAction(plotScatterAction);
+
     statMenu = menuBar()->addMenu(tr("&Statistics"));
     statMenu->addAction(pcaAction);
+    statMenu->addAction(treeAction);
+    statMenu->addAction(logRegAction);
 }
 
 void MainWindow::createActions() {
@@ -57,6 +63,14 @@ void MainWindow::createActions() {
     pcaAction = new QAction(tr("&PCA..."), this);
     pcaAction->setStatusTip(tr("Perform a principal component analysis"));
     connect(pcaAction, SIGNAL(triggered()), this, SLOT(pca()));
+
+    treeAction = new QAction(tr("&Decision tree..."), this);
+    treeAction->setStatusTip(tr("Make a decision tree from the data"));
+    connect(treeAction, SIGNAL(triggered()), this, SLOT(tree()));
+
+    logRegAction = new QAction(tr("&Logistic regression..."), this);
+    logRegAction->setStatusTip(tr("Perform logistic regression on the data"));
+    connect(logRegAction, SIGNAL(triggered()), this, SLOT(logReg()));
 }
 
 void MainWindow::open() {
@@ -144,7 +158,19 @@ QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName)
         if (mdiChild->currentFile() == canonicalFilePath)
             return window;
     }
-    return 0;
+    return nullptr;
+}
+
+QMdiSubWindow *MainWindow::findMdiChild(const std::shared_ptr<Numeric_pred_group> target_group)
+{
+    if (target_group == nullptr)
+      return nullptr;
+    foreach (QMdiSubWindow *window, mdiArea->subWindowList()) {
+        TableWidget *mdiChild = qobject_cast<TableWidget *>(window->widget());
+        if (mdiChild->pred_group_ == target_group)
+            return window;
+    }
+    return nullptr;
 }
 
 void MainWindow::updateMenus() {
@@ -304,7 +330,29 @@ void MainWindow::plotScatter() {
 
 void MainWindow::pca() {
   TableWidget* activeTbl = activeTable();
+  QMdiSubWindow *existing = findMdiChild(activeTbl->pred_group_->pca_pointer());
+  if (existing) {
+    existing->show();
+    return;
+  }
   TableWidget *child = createMdiChild();
   child->makePcaTable(activeTbl);
+  child->show();
+}
+
+void MainWindow::tree() {
+  TableWidget* activeTbl = activeTable();
+  TableWidget *child = createMdiChild();
+  std::shared_ptr<Tree> decisionTree = std::make_shared<Tree>(activeTbl->pred_group_);
+  decisionTree->find_splits();
+  child->makeTree(decisionTree, false);
+  child->show();
+}
+
+void MainWindow::logReg() {
+  TableWidget* activeTbl = activeTable();
+  TableWidget *child = createMdiChild();
+  std::shared_ptr<Log_reg> log_reg = std::make_shared<Log_reg>(activeTbl->pred_group_, statusBar());
+  child->classificationReport(activeTbl->pred_group_,log_reg->y_pred());
   child->show();
 }

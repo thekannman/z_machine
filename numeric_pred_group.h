@@ -1,3 +1,26 @@
+//Copyright (c) 2015 Zachary Kann
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+// ---
+// Author: Zachary Kann
+
 #ifndef _NUMERIC_PRED_GROUP_H_
 #define _NUMERIC_PRED_GROUP_H_
 
@@ -28,6 +51,7 @@ class Numeric_pred_group : public Prediction_group {
   inline arma::rowvec sample(int i) const { return x().row(i); }
   arma::mat& x() const { return is_pca_pointer_ ? *pca_x_ : *x_; }
   arma::ivec& y() const { return *y_; }
+  std::shared_ptr<arma::ivec> y_ptr() const { return y_; }
   std::string y_string(int i);
   std::string category(int i);
   std::vector<std::string> y_strings();
@@ -38,9 +62,6 @@ class Numeric_pred_group : public Prediction_group {
   std::shared_ptr<Numeric_pred_group> grab_testing(double training_fraction = 0.6);
   virtual bool read_csv(const std::string& filename, bool has_header = false);
   void pca();
-//  void plot_pca(int feat_x, int feat_y, std::vector<double> h_lines = {}, std::vector<double> v_lines = {});
-//  void plot_pca_setup(int feat_x, int feat_y, Gnuplot& gp);
-//  void Numeric_pred_group::plot_pca_xy(int feat_x, int feat_y, Gnuplot& gp);
   void euclidean_distance(bool scale = false, std::shared_ptr<arma::mat> distances = nullptr);
   void plot_distances();
   void grab_hist(int feat_i, QVector<double>& keys, QVector<double>& values, double& width, int num_bins = 10);
@@ -48,6 +69,7 @@ class Numeric_pred_group : public Prediction_group {
   void estimate_gaussian(int feat_i);
   Numeric_pred_group& operator=( const Numeric_pred_group& other );
   bool& pca_set() { return pca_set_; }
+  std::shared_ptr<Numeric_pred_group>& pca_pointer() { return pca_pointer_; }
 
   bool& is_pca_pointer() { return is_pca_pointer_; }
  private:
@@ -63,8 +85,9 @@ class Numeric_pred_group : public Prediction_group {
   arma::vec pca_var_;
   std::shared_ptr<arma::mat> distances_;
   bool is_pca_pointer_ = false;
+  std::shared_ptr<Numeric_pred_group> pca_pointer_;
 
   void randomize_positions(arma::mat& positions);
 };
 
-#endif
+#endif // _NUMERIC_PRED_GROUP_H_

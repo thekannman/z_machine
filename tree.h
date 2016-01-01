@@ -1,3 +1,26 @@
+//Copyright (c) 2015 Zachary Kann
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+// ---
+// Author: Zachary Kann
+
 #ifndef _TREE_H_
 #define _TREE_H_
 
@@ -12,7 +35,6 @@ class Tree {
   Tree(std::shared_ptr<Numeric_pred_group> pred_group, double(Tree::*m)(std::map<int, int>&) = &Tree::entropy)
     : metric(m), pred_group_(pred_group), items_contained_(pred_group->num_samples()),
       depth_(1), is_root_(true) {
-    getchar();
     items_contained_.imbue([&]() { static int i = 0; return i++; });
     total_depth_ = std::make_shared<int>(1);
   };
@@ -33,16 +55,18 @@ class Tree {
   double (Tree::*metric)(std::map<int, int>&);
   std::shared_ptr<Tree> left() { return left_; }
   std::shared_ptr<Tree> right() { return right_; }
-//  void plot_tree();
-//  void plot_leaves(Gnuplot& gp, double box_width, double h_offset = 0.0, double y_offset = 0.0, double old_h_offset = 0.0);
-//  void plot_leaf(Gnuplot& gp, double box_width, double h_offset, double y_offset, double old_h_offset);
-//  void plot_groups(bool plot_test = false);
-//  void plot_group_leaves(Gnuplot& gp, bool test, double box_width, double h_offset = 0.0, double y_offset = 0.0, double old_h_offset = 0.0);
-//  double plot_group_leaf(Gnuplot& gp, bool test, double box_width, double h_offset, double y_offset, double old_h_offset);
   double entropy(std::map<int, int>& group_counts);
   double gini(std::map<int, int>& group_counts);
   double misclassification(std::map<int, int>& group_counts);
   void set_test_set(std::shared_ptr<Numeric_pred_group> test_set);
+  int total_depth() { return *total_depth_; }
+  int depth() { return depth_; }
+  std::shared_ptr<Numeric_pred_group> pred_group() { return pred_group_; }
+  std::shared_ptr<Numeric_pred_group> test_group() { return test_group_; }
+  arma::uvec& items_contained() { return items_contained_; }
+  arma::uvec& test_items_contained() { return test_items_contained_; }
+  int split_variable() { return split_variable_; }
+  int split_value() { return split_value_; }
 
  private:
   int split_variable_ = -1;
@@ -63,4 +87,5 @@ class Tree {
   void propagate_set(std::shared_ptr<Numeric_pred_group> test_set, arma::uvec* include);
 };
 
-#endif
+#endif // _TREE_H
+

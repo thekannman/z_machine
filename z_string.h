@@ -21,14 +21,16 @@
 // ---
 // Author: Zachary Kann
 
+#ifndef _Z_STRING_H_
+#define _Z_STRING_H_
+
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <sstream>
 #include <functional>
 
-#ifndef _STRING_H_
-#define _STRING_H_
+
 
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, char delim);
@@ -49,4 +51,4 @@ static inline std::string &trim(std::string &s) {
   return ltrim(rtrim(s));
 }
 
-#endif
+#endif // _Z_STRING_H_

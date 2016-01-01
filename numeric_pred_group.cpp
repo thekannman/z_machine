@@ -144,62 +144,7 @@ void Numeric_pred_group::pca() {
   arma::princomp(pca_coeff_, *pca_x_, pca_var_, tsquared, *x_);
   pca_set_ = true;
 }
-/*
-void Numeric_pred_group::plot_pca(int feat_x, int feat_y, std::vector<double> h_lines, std::vector<double> v_lines) {
-  if (feat_x >= num_features() || feat_y >= num_features()) {
-    std::cerr << "Selected feature outside of range.";
-    return;
-  }
-  Gnuplot gp("\"C:\\Program Files\\gnuplot\\bin\\gnuplot.exe\"");
-  plot_pca_setup(feat_x, feat_y, gp);
-  for (auto i : h_lines) {
-    gp << "set arrow from " << plot_x_min() << "," << i << " to " << plot_x_max() << "," << i << " nohead\n";
-  }
-  for (auto i : v_lines) {
-    gp << "set arrow from " << i << "," << plot_y_min() << " to " << i << "," << plot_y_max() << " nohead\n";
-  }
-  plot_pca_xy(feat_x, feat_y, gp);
-  getchar();
-}
 
-void Numeric_pred_group::plot_pca_setup(int feat_x, int feat_y, Gnuplot& gp) {
-  if (!pca_set_)
-    pca();
-  plot_min_ = Point(floor(pca_x_.col(feat_x).min()), floor(pca_x_.col(feat_y).min()));
-  plot_max_ = Point(ceil(pca_x_.col(feat_x).max()), ceil(pca_x_.col(feat_y).max()));
-  gp << "set xrange [" << plot_x_min() << ":" << plot_x_max() << "]\nset yrange [" << plot_y_min() << ":" << plot_y_max() << "]\n";
-}
-
-void Numeric_pred_group::plot_pca_xy(int feat_x, int feat_y, Gnuplot& gp) {
-  gp << "plot";
-  for (int i = 0, i_max = num_categories(); i < i_max; ++i) {
-    if (i != 0)
-      gp << ",";
-    gp << " '-' title '" << category(i) << "'";
-  }
-  gp << "\n";
-
-  arma::mat A;
-  arma::uvec features, samples(num_samples());
-  features << feat_x << feat_y;
-  int count = 0;
-
-  for (auto category : y_map_) {
-    for (int i = 0, i_max = static_cast<int>(num_samples()); i < i_max; ++i) {
-      if (y(i) == category.second) {
-        samples(count) = i;
-        ++count;
-      }
-    }
-    samples.resize(count);
-    A = pca_x_.submat(samples, features);
-    gp.send1d(A);
-    samples = arma::zeros<arma::uvec>(num_samples());
-    count = 0;
-  }
-
-}
-*/
 void Numeric_pred_group::euclidean_distance(bool scale, std::shared_ptr<arma::mat> distances) {
   arma::mat new_x(*x_);
   distances_ = std::make_shared<arma::mat>(new_x.n_rows, new_x.n_rows, arma::fill::zeros);
